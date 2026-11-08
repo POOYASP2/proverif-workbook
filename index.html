@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ProVerif Workbook – practice the language</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF1F5; --sheet:#FFFFFF; --ink:#1C2433; --muted:#5B6578;
+  --rule:#D3D9E3; --accent:#2F5D8A; --accent-soft:#DCE7F2;
+  --ok:#2E7D4F; --ok-soft:#DFF1E6; --bad:#B3403A; --bad-soft:#F8E1DF;
+  --slot-bg:#DAD4FA; --slot-line:#6C5CE0; --slot-ink:#21184F;
+  --tok-bg:#EFEBFF; --tok-line:#A79BF0;
+  --code-bg:#1E2635; --code-ink:#DCE3EE; --kw:#8FB8E8; --ty:#9FD6B5; --cm:#7D8799; --fn:#F2C98B; --pn:#A9B3C4;
+  --serif:"Literata", Georgia, "Times New Roman", serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#151A23; --sheet:#1C2230; --ink:#E4E8EF; --muted:#9AA4B5;
+    --rule:#2E3647; --accent:#7FAEDD; --accent-soft:#24344A;
+    --ok:#6CC28F; --ok-soft:#1D3328; --bad:#E58A83; --bad-soft:#3A2220;
+    --tok-bg:#2A2650; --tok-line:#6C5CE0; --code-bg:#11161F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#151A23; --sheet:#1C2230; --ink:#E4E8EF; --muted:#9AA4B5;
+  --rule:#2E3647; --accent:#7FAEDD; --accent-soft:#24344A;
+  --ok:#6CC28F; --ok-soft:#1D3328; --bad:#E58A83; --bad-soft:#3A2220;
+  --tok-bg:#2A2650; --tok-line:#6C5CE0; --code-bg:#11161F;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.6}
+a{color:var(--accent)}
+button{font:inherit;cursor:pointer}
+[hidden]{display:none !important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.layout{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+nav.side{border-right:1px solid var(--rule);padding:28px 18px;position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--paper)}
+.brand{font-weight:700;font-size:1.35rem;line-height:1.2;margin:0 0 4px}
+.brand small{display:block;font-weight:400;font-size:.9rem;color:var(--muted);margin-top:4px}
+.steps{list-style:none;margin:22px 0 0;padding:0}
+.steps a{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:baseline;padding:7px 10px;border-radius:6px;text-decoration:none;color:var(--ink);font-size:.94rem;line-height:1.35}
+.steps a:hover{background:var(--accent-soft)}
+.steps a.active{background:var(--accent-soft);font-weight:600}
+.steps .n{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+.steps .p{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.steps .p.full{color:var(--ok)}
+.steps li.sep{border-top:1px solid var(--rule);margin:10px 0 6px}
+.side-foot{margin-top:24px;font-size:.85rem;color:var(--muted);display:flex;flex-direction:column;gap:8px}
+.side-foot button{background:none;border:1px solid var(--rule);color:var(--ink);border-radius:6px;padding:6px 10px;text-align:left;font-size:.85rem}
+.side-foot button:hover{border-color:var(--accent)}
+
+main{padding:40px 48px 120px;max-width:920px;width:100%}
+.mobile-bar{display:none}
+h1{font-size:2.1rem;line-height:1.15;margin:0 0 12px;font-weight:700}
+h2{font-size:1.3rem;margin:0 0 6px}
+.lead{color:var(--muted);max-width:68ch;margin:0 0 28px}
+.intro{max-width:70ch}
+.intro code,.ex-prompt code,.explain code,.hint code,.cheat code,.opt code,.prose-drag code,.order-item code{font-family:var(--mono);font-size:.86em;background:var(--accent-soft);padding:1px 5px;border-radius:4px}
+
+.ex{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:22px 24px;margin:28px 0}
+.ex-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:6px}
+.ex-head h2{font-size:1.12rem}
+.ex-meta{display:flex;gap:10px;align-items:baseline}
+.kind{font-family:var(--mono);font-size:.7rem;color:var(--muted);border:1px solid var(--rule);border-radius:999px;padding:0 8px;white-space:nowrap}
+.badge{font-family:var(--mono);font-size:.72rem;color:var(--muted);white-space:nowrap}
+.badge.done{color:var(--ok)}
+.from{font-size:.85rem;color:var(--muted);margin:-2px 0 8px}
+.ex-prompt{margin:0 0 14px;max-width:72ch}
+
+pre.code{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:14px;line-height:1.85;padding:18px 20px;border-radius:8px;overflow-x:auto;margin:0;white-space:pre;tab-size:2}
+.code .k{color:var(--kw)} .code .t{color:var(--ty)} .code .c{color:var(--cm);font-style:italic} .code .f{color:var(--fn)} .code .pn{color:var(--pn)}
+
+/* blanks and drop slots: lilac */
+.blank{font-family:var(--mono);font-size:14px;background:var(--slot-bg);color:var(--slot-ink);border:none;border-bottom:2px solid var(--slot-line);border-radius:3px;padding:1px 4px;margin:0 1px;min-width:3ch;line-height:1.4}
+.blank:focus{outline:2px solid #B9AEFF;outline-offset:1px}
+.blank.right,.slot.right{background:#BFE6CC;border-color:#2E7D4F;color:#0F3520}
+.blank.wrong,.slot.wrong{background:#F5C9C5;border-color:#B3403A;color:#4A100C}
+.slot{display:inline-block;min-width:7ch;min-height:1.5em;vertical-align:middle;font-family:var(--mono);font-size:14px;line-height:1.4;padding:1px 6px;margin:0 2px;border:2px dashed var(--slot-line);border-radius:4px;background:rgba(108,92,224,.14);color:var(--slot-ink);cursor:pointer;white-space:pre}
+.code .slot{color:#E9E5FF}
+.slot.filled{border-style:solid;background:var(--slot-bg);color:var(--slot-ink)}
+.slot.over{outline:2px solid #B9AEFF}
+.prose-drag{display:flex;flex-direction:column;gap:10px}
+.prose-drag .row{padding:10px 12px;border:1px solid var(--rule);border-radius:6px;line-height:2}
+.bank-label{font-size:.85rem;color:var(--muted);margin:14px 0 6px}
+.bank{display:flex;flex-wrap:wrap;gap:8px;min-height:40px;padding:10px;border:1px dashed var(--rule);border-radius:8px}
+.tok{font-family:var(--mono);font-size:13.5px;background:var(--tok-bg);border:1px solid var(--tok-line);color:var(--ink);border-radius:6px;padding:4px 10px;cursor:grab;touch-action:manipulation;white-space:pre;text-align:left}
+.tok.sel{outline:3px solid var(--slot-line);outline-offset:1px}
+.tok:active{cursor:grabbing}
+
+.order{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.order-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:8px 10px;background:var(--code-bg);color:var(--code-ink);border:2px solid transparent;border-radius:6px;cursor:grab}
+.order-item.plain{background:var(--sheet);color:var(--ink);border-color:var(--rule);font-family:var(--serif)}
+.order-item .line{font-family:var(--mono);font-size:13.5px;white-space:pre;overflow-x:auto}
+.order-item.plain .line{font-family:var(--serif);font-size:.95rem;white-space:normal}
+.order-item .grip{color:var(--pn);font-family:var(--mono);user-select:none}
+.order-item.dragging{opacity:.4}
+.order-item.over{border-color:#B9AEFF}
+.order-item.right{border-color:#2E7D4F}
+.order-item.wrong{border-color:#B3403A}
+.mv{display:flex;gap:4px}
+.mv button{border:1px solid var(--pn);background:transparent;color:inherit;border-radius:4px;width:30px;height:28px;padding:0;font-size:.8rem}
+.order-item.plain .mv button{border-color:var(--rule)}
+
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btn{border:1px solid var(--rule);background:var(--sheet);color:var(--ink);padding:7px 14px;border-radius:6px;font-size:.92rem;text-decoration:none;display:inline-block}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--sheet)}
+.btn.primary:hover{filter:brightness(1.08)}
+
+.verdict{font-family:var(--mono);font-size:.88rem;margin-top:14px;padding:10px 14px;border-radius:6px;border-left:4px solid;display:none}
+.verdict.show{display:block}
+.verdict.true{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.verdict.false{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.verdict b{font-weight:600}
+.hint,.explain{margin-top:12px;padding:12px 14px;border-radius:6px;background:var(--accent-soft);font-size:.95rem;display:none;max-width:74ch}
+.hint.show,.explain.show{display:block}
+
+.opts{display:flex;flex-direction:column;gap:8px;margin:4px 0 0}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--rule);border-radius:6px;cursor:pointer;font-size:.96rem}
+.opt:hover{border-color:var(--accent)}
+.opt input{margin-top:5px}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.mc-code{margin:0 0 12px}
+
+textarea.write{width:100%;min-height:280px;font-family:var(--mono);font-size:14px;line-height:1.6;background:var(--code-bg);color:var(--code-ink);border:none;border-radius:8px;padding:16px;resize:vertical;tab-size:2}
+.solution{margin-top:12px;display:none}
+.solution.show{display:block}
+.checklist{margin:10px 0 0;padding-left:20px;font-size:.95rem}
+.checklist li.okc{color:var(--ok)} .checklist li.miss{color:var(--bad)}
+
+.nextprev{display:flex;justify-content:space-between;gap:12px;margin-top:40px;border-top:1px solid var(--rule);padding-top:20px;flex-wrap:wrap}
+.cheat table{border-collapse:collapse;width:100%;font-size:.93rem}
+.cheat-wrap{overflow-x:auto}
+.cheat th,.cheat td{border-bottom:1px solid var(--rule);text-align:left;padding:8px 10px;vertical-align:top}
+.cheat td:first-child{font-family:var(--mono);font-size:.85rem;white-space:pre}
+.cheat h2{margin-top:32px}
+
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr}
+  nav.side{position:fixed;inset:0 auto 0 0;width:300px;z-index:20;transform:translateX(-105%);transition:transform .2s;padding-top:calc(28px + env(safe-area-inset-top,0px))}
+  nav.side.open{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.35)}
+  .mobile-bar{display:flex;align-items:center;justify-content:space-between;position:sticky;top:env(safe-area-inset-top,0px);background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 16px;z-index:10}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--paper);z-index:11}
+  main{padding:24px 14px 100px}
+  .ex{padding:18px 14px}
+  h1{font-size:1.7rem}
+}
+@media (prefers-reduced-motion:reduce){nav.side{transition:none}}
+</style>
+</head>
+<body>
+<div class="mobile-bar">
+  <strong>ProVerif Workbook</strong>
+  <button class="btn" id="menuBtn" aria-expanded="false" aria-controls="side">Steps</button>
+</div>
+<div class="layout">
+  <nav class="side" id="side" aria-label="Learning steps">
+    <p class="brand">ProVerif Workbook<small>Fill, drag, order and explain until the syntax feels natural.</small></p>
+    <ol class="steps" id="steps"></ol>
+    <div class="side-foot">
+      <span id="totalProgress"></span>
+      <button id="themeBtn">Switch light/dark</button>
+      <button id="resetBtn">Reset my progress</button>
+    </div>
+  </nav>
+  <main id="main"></main>
+</div>
+
+<script>
+/* =========================================================================
+   CONTENT
+   fill  : code with {{id}} markers; blanks:{id:[accepted answers]}
+   drag  : template with {{id}} slots; slots:{id:"answer"}; tokens:[pieces incl. distractors]
+           mode:"prose" renders the template as text rows (one row per line)
+   order : lines:[text | [text, rank]] in correct order; equal ranks may swap; plain:true for prose
+   mc    : question, options, correct:[indexes], multi:true for several, code: optional snippet
+   write : starter, checks:[[label, snippet]], solution
+   ========================================================================= */
+const MODULES = [
+/* ---------------------------------------------------------------- 1 */
+{id:"types", title:"Types, channels and free names",
+ intro:`<p>Every typed ProVerif script starts with declarations. <code>type t.</code> creates a new type; built-ins are <code>bitstring</code>, <code>channel</code>, <code>bool</code> and <code>time</code>. <code>free</code> declares a global name. Free names are <b>public</b> (the attacker knows them) unless you add <code>[private]</code>.</p>
+<p>Every declaration ends with a period. Comments are written <code>(* like this *)</code>.</p>`,
+ exercises:[
+ {type:"fill", title:"Declare the basics",
+  prompt:"Declare a new type for symmetric keys, a public channel <code>c</code>, and a secret <code>s</code> the attacker must not know initially.",
+  code:`(* a user-defined type *)
+{{a}} key.
+
+(* the public channel *)
+{{b}} c:{{c}}.
+
+(* the secret *)
+free s:bitstring [{{d}}].`,
+  blanks:{a:["type"],b:["free"],c:["channel"],d:["private"]},
+  hint:"Four keywords: one creates a type, one declares a global name, one is the built-in type of channels, one hides a name from the attacker.",
+  explain:"Without <code>[private]</code>, <code>s</code> would be in the attacker’s initial knowledge and <code>query attacker(s)</code> would trivially be false."},
+ {type:"fill", title:"Key types used throughout the course",
+  prompt:"Declare the three types used for public-key crypto and the result type returned by signature checking.",
+  code:`type {{a}}.    (* public key *)
+type {{b}}.    (* private key *)
+type {{c}}.  (* key material: a key pair *)
+type {{d}}.  (* result of check signature *)`,
+  blanks:{a:["pkey"],b:["skey"],c:["keymat"],d:["result"]},
+  explain:"<code>keymat</code> models the key pair. <code>pk(kp)</code> and <code>sk(kp)</code> extract its two halves, so a single <code>new kp:keymat</code> creates a consistent pair."},
+ {type:"drag", title:"Assemble the declarations",
+  prompt:"Drag each piece into place. Some pieces are not needed.",
+  template:`{{a}} key.
+{{b}} c:channel.
+free kpA:keymat [{{c}}].
+free s:{{d}} [private].`,
+  slots:{a:"type",b:"free",c:"private",d:"bitstring"},
+  tokens:["type","free","private","bitstring","fun","new","public","channel"],
+  explain:"There is no <code>public</code> keyword: free names are public by default."},
+ {type:"mc", title:"Who knows what?",
+  question:"Given <code>free c:channel.</code> and <code>free kpA:keymat [private].</code>, which statements are true?",
+  multi:true,
+  options:["The attacker knows c from the start","The attacker knows kpA from the start","The attacker can learn kpA if some process outputs it on c","Private free names can never be learned by the attacker"],
+  correct:[0,2],
+  explain:"<code>[private]</code> only removes the name from the attacker’s <i>initial</i> knowledge. If an honest process sends it on a public channel, the attacker learns it."},
+ {type:"mc", title:"free [private] or new?",
+  question:"Script 1 has <code>free kpA:keymat [private].</code>; script 2 has <code>process new kpA:keymat; (...)</code> at the top of the main process. Which is true?",
+  options:["Only script 1 hides kpA from the attacker","In both, kpA is unknown to the attacker at start and all replicated sessions share one key pair","Script 2 creates a fresh key pair for every session","Script 2 is rejected because new cannot appear in the main process"],
+  correct:[1],
+  explain:"A <code>new</code> at the top of the main process, outside any <code>!</code>, runs once. A <code>new</code> placed after a <code>!</code> would create a fresh name per copy."},
+ {type:"mc", title:"Typing tuples",
+  question:"In the typed calculus, what type does ProVerif give to <code>(pk(kpA), nA)</code>?",
+  options:["(pkey, bitstring)","bitstring","pkey","It cannot be typed"],
+  correct:[1],
+  explain:"All tuples have type <code>bitstring</code>. That is why you can pass a tuple to <code>penc(bitstring, pkey)</code> and must re-type the components when you split it: <code>let (x:pkey, y:bitstring) = ...</code>."}
+ ]},
+/* ---------------------------------------------------------------- 2 */
+{id:"crypto", title:"Constructors and destructors",
+ intro:`<p>Cryptography is modelled with <b>perfect</b> (Dolev-Yao) primitives. A <code>fun</code> is a constructor: it builds terms and cannot be inverted. A <code>reduc</code> is a destructor defined by a rewrite rule; if no rule matches, the destructor <b>fails</b> and the process stops (or takes the <code>else</code> branch).</p>
+<p>Shape of a rule: <code>reduc forall x:T1, y:T2; d(pattern) = result.</code></p>`,
+ exercises:[
+ {type:"fill", title:"Symmetric encryption",
+  prompt:"Encryption with key <code>k</code>; decryption only works with the same key.",
+  code:`{{a}} senc(bitstring, key): bitstring.
+{{b}} {{c}} m:bitstring, k:key{{d}} sdec({{e}}, k) = {{f}}.`,
+  blanks:{a:["fun"],b:["reduc"],c:["forall"],d:[";"],e:["senc(m,k)"],f:["m"]},
+  hint:"The variables list ends with a semicolon. Decryption takes the ciphertext built by the constructor.",
+  explain:"Perfect cryptography: the only way to get <code>m</code> back from <code>senc(m,k)</code> is having <code>k</code>."},
+ {type:"fill", title:"From untyped to typed",
+  prompt:"The slides show the untyped version <code>fun senc/2. reduc sdec(senc(x,y),y) = x.</code> Write the typed one.",
+  code:`type key.
+fun senc({{a}}, {{b}}): {{c}}.
+reduc {{d}} m:bitstring, k:key; sdec(senc(m,k),k) = m.`,
+  blanks:{a:["bitstring"],b:["key"],c:["bitstring"],d:["forall"]},
+  explain:"Typed constructors list argument types and the result type. Variables in rewrite rules are declared with <code>forall</code>. Typed files use the <code>.pv</code> extension; untyped ones are run with <code>-in pi</code>."},
+ {type:"fill", title:"Public-key encryption",
+  prompt:"Encrypt with the public key of a pair, decrypt with the secret key of the <i>same</i> pair.",
+  code:`fun penc(bitstring, pkey): bitstring.
+fun pk(keymat): {{a}}.
+fun sk(keymat): {{b}}.
+reduc forall x:bitstring, y:keymat;
+  pdec(penc(x, {{c}}), {{d}}) = x.`,
+  blanks:{a:["pkey"],b:["skey"],c:["pk(y)"],d:["sk(y)"]},
+  explain:"Using the same variable <code>y</code> in both places forces the two keys to come from the same key pair."},
+ {type:"fill", title:"Digital signatures",
+  prompt:"Sign with the secret key; anybody can read the message; checking needs the public key.",
+  code:`fun ok(): result.
+fun sign(bitstring, skey): bitstring.
+reduc forall m:bitstring, y:keymat; getmess(sign(m, {{a}})) = m.
+reduc forall m:bitstring, y:keymat; checksign(sign(m, sk(y)), {{b}}) = {{c}}.`,
+  blanks:{a:["sk(y)"],b:["pk(y)"],c:["ok()"]},
+  hint:"Exam trap (Jan 2026): the given script checked with sk(y). Verification must use the public key.",
+  explain:"<code>getmess</code> needs no key, so signatures do not give confidentiality. <code>checksign</code> returns <code>ok()</code> only for a signature made with the matching secret key."},
+ {type:"fill", title:"Cryptographic hash",
+  prompt:"A hash function cannot be inverted. Declare it.",
+  code:`{{a}} hash(bitstring): {{b}}.
+(* destructors needed: none *)`,
+  blanks:{a:["fun"],b:["bitstring"]},
+  explain:"No <code>reduc</code>: the attacker can compute <code>hash(x)</code> from <code>x</code>, but never <code>x</code> from <code>hash(x)</code>. To check a hash, recompute it and compare with <code>if</code>."},
+ {type:"fill", title:"MAC (exam Jan 2026)",
+  prompt:"A MAC is computed from a message and a symmetric key; verification uses the same key and the message.",
+  code:`fun mac(bitstring, key): bitstring.
+reduc forall m:bitstring, k:key;
+  checkmac(mac(m, k), {{a}}, {{b}}) = {{c}}.`,
+  blanks:{a:["m"],b:["k"],c:["ok()"]},
+  explain:"Alternative with no destructor: the receiver recomputes <code>mac(xm,k)</code> and compares with <code>if xmac = mac(xm,k) then</code>."},
+ {type:"mc", title:"Perfect properties of the MAC model",
+  question:"With <code>fun mac(bitstring,key):bitstring</code> and the <code>checkmac</code> rule above, which properties hold in the symbolic model?",
+  multi:true,
+  options:["Nobody can build mac(m,k) without knowing k","No destructor extracts m or k from mac(m,k)","checkmac succeeds only with the same message and the same key","mac(m1,k) and mac(m2,k) are different terms when m1 ≠ m2 (no collisions)","The attacker can verify a MAC if it knows only m"],
+  correct:[0,1,2,3],
+  explain:"Constructors are free: distinct arguments give distinct terms, there are no collisions, and terms can only be built by someone who knows all arguments. Verifying needs k too."},
+ {type:"mc", title:"Why not this destructor?",
+  question:"Someone defines <code>reduc forall m:bitstring, k:key; checkmac(mac(m,k), k) = m.</code> What is wrong with it as a MAC model?",
+  options:["Nothing, it is equivalent","Anyone holding k can extract m from the MAC alone, which a real MAC does not let you do","It makes the MAC forgeable without the key","ProVerif rejects destructors that return a variable"],
+  correct:[1],
+  explain:"A MAC is not encryption. This rule lets the key holder recover the message from the tag, which real MACs don’t provide."},
+ {type:"drag", mode:"prose", title:"Match each primitive to its rewrite rule",
+  template:`Symmetric decryption: {{a}}
+Public-key decryption: {{b}}
+Extracting a signed message: {{c}}
+Checking a signature: {{d}}`,
+  slots:{a:"sdec(senc(m,k),k) = m",b:"pdec(penc(x,pk(y)),sk(y)) = x",c:"getmess(sign(m,sk(y))) = m",d:"checksign(sign(m,sk(y)),pk(y)) = ok()"},
+  tokens:["sdec(senc(m,k),k) = m","pdec(penc(x,pk(y)),sk(y)) = x","getmess(sign(m,sk(y))) = m","checksign(sign(m,sk(y)),pk(y)) = ok()","checksign(sign(m,sk(y)),sk(y)) = ok()","pdec(penc(x,sk(y)),pk(y)) = x","hash(hash(x)) = x"],
+  explain:"The distractors are the classic errors: checking with sk, encrypting with sk, and inverting a hash."}
+ ]},
+/* ---------------------------------------------------------------- 3 */
+{id:"process", title:"Processes",
+ intro:`<p>Each protocol role is a process macro: <code>let pA(params) = P.</code> The building blocks:</p>
+<p><code>new n:T;</code> fresh name · <code>out(c, M);</code> send · <code>in(c, x:T);</code> receive · <code>let pattern = M in P [else Q]</code> · <code>if M then P [else Q]</code> · <code>event e(M);</code> · <code>0</code> stop · <code>P | Q</code> parallel · <code>!P</code> unbounded copies.</p>
+<p>Patterns: <code>x:T</code> binds a variable, <code>(T1, T2)</code> splits a tuple, <code>=M</code> checks equality with M.</p>`,
+ exercises:[
+ {type:"fill", title:"Send, receive, stop",
+  prompt:"A creates a fresh nonce, sends it encrypted with k, waits for a bitstring, and ends.",
+  code:`{{a}} pA(k:key) =
+  {{b}} n:bitstring;
+  {{c}}(c, senc(n, k));
+  {{d}}(c, {{e}});
+  {{f}}.`,
+  blanks:{a:["let"],b:["new"],c:["out"],d:["in"],e:["x:bitstring"],f:["0"]},
+  explain:"Inputs always declare the variable with its type. The process ends with <code>0</code> and the macro definition ends with a period."},
+ {type:"drag", mode:"prose", title:"Which construct does what?",
+  template:`Unbounded copies of P: {{a}}
+Run P and Q in parallel: {{b}}
+Create a fresh name: {{c}}
+Stop the process: {{d}}
+Record a trace event: {{e}}
+Enter a later phase: {{f}}`,
+  slots:{a:"!P",b:"P | Q",c:"new n:T; P",d:"0",e:"event e(M); P",f:"phase 1; P"},
+  tokens:["!P","P | Q","new n:T; P","0","event e(M); P","phase 1; P","free n:T.","P ; Q"],
+  explain:"<code>free</code> is a top-level declaration, not a process. There is no sequential composition of two processes with <code>;</code>."},
+ {type:"fill", title:"Patterns and tests",
+  prompt:"Split a received pair, check that the first component is our nonce <code>nA</code>, and test a signature.",
+  code:`let (x1:bitstring, x2:bitstring) = x {{a}}
+let ({{b}}, xnB:bitstring) = pdec(x, sk(kpA)) in
+if checksign(y1, pkA) = ok() {{c}}
+  out(c, x2)
+{{d}} 0.`,
+  blanks:{a:["in"],b:["=nA"],c:["then"],d:["else"]},
+  explain:"<code>(=nA, xnB:bitstring)</code> succeeds only if the first component equals <code>nA</code>; otherwise the process stops (or takes the <code>else</code> branch)."},
+ {type:"mc", title:"When a destructor fails",
+  question:"<code>let xs = sdec(x, k) in P else Q</code>, and x is <i>not</i> a ciphertext under k. What happens?",
+  options:["xs is bound to a special fail value and P runs","Q runs","The whole system deadlocks","ProVerif reports a type error"],
+  correct:[1],
+  explain:"If no rewrite rule applies, the destructor fails and the <code>else</code> branch runs. Without <code>else</code>, the process just stops (<code>else 0</code>)."},
+ {type:"mc", title:"A transition step",
+  question:"What does <code>(in(c,x); out(c,senc(x,k)); 0) | (out(c,a); in(c,y); P)</code> become after one communication on c?",
+  code:`(in(c,x); out(c,senc(x,k)); 0) | (out(c,a); in(c,y); P)`,
+  options:["(out(c,senc(a,k)); 0) | (in(c,y); P)","(out(c,senc(x,k)); 0) | (in(c,y); P)","out(c,senc(a,k)); P","Nothing: two processes cannot talk on a public channel"],
+  correct:[0],
+  explain:"The output of <code>a</code> synchronises with the input: x is replaced by a in the receiver, and the sender continues. This is the semantics on slide 17."},
+ {type:"fill", title:"The main process",
+  prompt:"Create two key pairs, publish the public keys, and run unboundedly many sessions of both roles.",
+  code:`{{a}}
+  new kpA:keymat;
+  new kpB:keymat;
+  (
+    {{b}}out(c, {{c}}); 0
+  | !out(c, pk(kpB)); 0
+  {{d}} !pA(kpA, pk(kpB)) | !pB(kpB, pk(kpA))
+  )`,
+  blanks:{a:["process"],b:["!"],c:["pk(kpA)"],d:["|"]},
+  explain:"Publishing <code>pk(kpA)</code> models the assumption that the attacker knows public keys."},
+ {type:"fill", title:"The sample handshake (slides)",
+  prompt:"Message 1: A→B <code>{{k}skA}pkB</code>, k fresh. Message 2: B→A <code>{s}k</code>. Complete both roles.",
+  code:`let pA(kpA:keymat, pkB:pkey) =
+  new k:bitstring;
+  out(c, penc({{a}}, {{b}}));
+  in(c, x:bitstring);
+  let xs = sdec(x, k) in
+  0.
+
+let pB(kpB:keymat, pkA:pkey) =
+  in(c, y:bitstring);
+  let y1 = pdec(y, {{c}}) in
+  if checksign(y1, {{d}}) = ok() then
+  let xk = {{e}} in
+  out(c, {{f}});
+  0.`,
+  blanks:{a:["sign(k,sk(kpA))"],b:["pkB"],c:["sk(kpB)"],d:["pkA"],e:["getmess(y1)"],f:["senc(s,xk)"]},
+  explain:"B decrypts with its own secret key, verifies A’s signature with A’s public key, extracts k and uses it to encrypt the secret."},
+ {type:"drag", title:"Drag-build pB",
+  prompt:"Same role, now with pieces. Watch the distractors.",
+  template:`let pB(kpB:keymat, pkA:pkey) =
+  in(c, y:bitstring);
+  let y1 = pdec(y, {{a}}) in
+  if checksign(y1, {{b}}) = ok() then
+  let xk = {{c}} in
+  out(c, {{d}});
+  0.`,
+  slots:{a:"sk(kpB)",b:"pkA",c:"getmess(y1)",d:"senc(s, xk)"},
+  tokens:["sk(kpB)","pkA","getmess(y1)","senc(s, xk)","sk(kpA)","pk(kpB)","sdec(y1, xk)","senc(xk, s)"]},
+ {type:"order", title:"Put pB in the right order",
+  lines:["let pB(kpB:keymat, pkA:pkey) =","  in(c, y:bitstring);","  let y1 = pdec(y, sk(kpB)) in","  if checksign(y1, pkA) = ok() then","  let xk = getmess(y1) in","  out(c, senc(s, xk));","  0."],
+  explain:"A variable can only be used after the step that binds it, so the order follows the data: receive y, decrypt to y1, check y1, extract xk, use xk."},
+ {type:"mc", title:"What does replication model?",
+  question:"In <code>!pA(kpA, pk(kpB))</code>, what does the <code>!</code> model?",
+  options:["One session of A","An unbounded number of concurrent sessions of A, all with the same long-term key pair","A fresh key pair for every session","A sequence of sessions, one after the other"],
+  correct:[1],
+  explain:"Replication gives unboundedly many parallel copies. The parameters are the same in every copy; only names created inside pA with <code>new</code> are fresh per session."}
+ ]},
+/* ---------------------------------------------------------------- 4 */
+{id:"secrecy", title:"Secrecy and reachability",
+ intro:`<p><code>query attacker(s).</code> asks whether the attacker can derive <code>s</code>. ProVerif reports <code>RESULT not attacker(s[]) is true.</code> when secrecy holds.</p>
+<p>Sanity check: declare an event at the end of each role and query <code>event(endA)</code>. A result of <b>false</b> means the end is reachable, which is what you want.</p>`,
+ exercises:[
+ {type:"fill", title:"Secrecy query",
+  prompt:"Ask whether the attacker can obtain s.",
+  code:`free s:bitstring [private].
+{{a}} {{b}}(s).`,
+  blanks:{a:["query"],b:["attacker"]}},
+ {type:"fill", title:"Reachability sanity check",
+  prompt:"Make sure pB really reaches its end.",
+  code:`event endB.
+query {{a}}.
+
+let pB(kpB:keymat, pkA:pkey) =
+  ...
+  out(c, senc(s, xk));
+  {{b}};
+  0.`,
+  blanks:{a:["event(endB)","event(endB())"],b:["event endB","event endB()"]},
+  explain:"If a typo makes pB always fail (wrong key, wrong pattern), every secrecy query becomes trivially true. The reachability query catches that."},
+ {type:"drag", mode:"prose", title:"Read the report",
+  template:`RESULT not attacker(s[]) is true. → {{a}}
+RESULT not attacker(s[]) is false. → {{b}}
+RESULT not event(endB) is false. → {{c}}
+RESULT not event(endB) is true. → {{d}}
+RESULT ... cannot be proved. → {{e}}`,
+  slots:{a:"s is secret in every trace",b:"the attacker can derive s",c:"pB can reach its end",d:"pB never reaches its end: the model is broken",e:"no proof and no attack reconstructed"},
+  tokens:["s is secret in every trace","the attacker can derive s","pB can reach its end","pB never reaches its end: the model is broken","no proof and no attack reconstructed","s is strongly secret"],
+  explain:"ProVerif always tries to prove the negation of the bad thing (‘not attacker’, ‘not event’). True means the bad thing never happens."},
+ {type:"mc", title:"Suspiciously good results",
+  question:"A student gets <code>not attacker(s[]) is true</code> and <code>not event(endB) is true</code>. What should they conclude?",
+  options:["The protocol is secure","pB never reaches its end, so pB probably never sends s: secrecy is proved for a broken model","There is an attack on s","ProVerif did not terminate"],
+  correct:[1],
+  explain:"Typical causes: decrypting with the wrong key, checking a signature with the wrong key, or a pattern that never matches. Fix the model until the reachability query is false."},
+ {type:"mc", title:"Formal definition of secrecy",
+  question:"Which is the slides’ definition of “P preserves the secrecy of N from S-adversaries”?",
+  options:["For every closed process Q with fn(Q) ⊆ S and every trace T of P | Q, T does not output N on a channel in S","There is an adversary Q such that no trace of P | Q outputs N","P never outputs N on any channel","P[x/N] ≈S P[x'/N]"],
+  correct:[0],
+  explain:"An S-adversary is any closed process whose free names are in S (its initial knowledge). The last option is strong secrecy, a different property."}
+ ]},
+/* ---------------------------------------------------------------- 5 */
+{id:"auth", title:"Events and authentication",
+ intro:`<p>Authentication and integrity are <b>correspondence</b> properties: “if B finished, then A really started with the same parameters”. Declare events with their types, insert them in the processes, then query.</p>
+<p><code>event(e(x)) ==> event(b(x))</code> is non-injective: many <code>e</code> may match a single <code>b</code>. <code>inj-event(e(x)) ==> inj-event(b(x))</code> requires a distinct <code>b</code> for each <code>e</code>, which rules out replays.</p>`,
+ exercises:[
+ {type:"fill", title:"Declare events and the query",
+  prompt:"A-to-B authentication and integrity of the key k in the handshake.",
+  code:`{{a}} bA(pkey, pkey, bitstring).
+event eB(pkey, pkey, bitstring).
+
+query x:pkey, y:pkey, z:bitstring{{d}}
+  {{b}}(eB(x,y,z)) {{c}} event(bA(x,y,z)).`,
+  blanks:{a:["event"],b:["event"],c:["==>"],d:[";"]},
+  explain:"Variables in a query are declared after <code>query</code> and the list ends with a semicolon."},
+ {type:"fill", title:"Place the events",
+  prompt:"bA goes in A before it sends; eB goes in B after it has accepted the key and before it continues.",
+  code:`let pA(kpA:keymat, pkB:pkey) =
+  new k:bitstring;
+  event bA({{a}}, pkB, k);
+  out(c, penc(sign(k, sk(kpA)), pkB));
+  ...
+
+let pB(kpB:keymat, pkA:pkey) =
+  in(c, y:bitstring);
+  let y1 = pdec(y, sk(kpB)) in
+  if checksign(y1, pkA) = ok() then
+  let xk = getmess(y1) in
+  event eB(pkA, {{b}}, {{c}});
+  out(c, senc(s, xk));
+  0.`,
+  blanks:{a:["pk(kpA)"],b:["pk(kpB)"],c:["xk"]},
+  explain:"Both events use the same argument order (sender key, receiver key, data). B records what it <i>believes</i>: the key it received, <code>xk</code>. Including the key turns authentication into data integrity of k (slide 42)."},
+ {type:"mc", title:"Why these positions?",
+  question:"Why is <code>event bA</code> placed before A’s output, and <code>event eB</code> after all of B’s checks?",
+  multi:true,
+  options:["If bA came after the output, the attacker could make B finish before bA happens, giving a spurious attack","If eB came before the checks, B would ‘finish’ even on messages it would reject","The position does not matter for correspondence queries","eB must be the very last statement of the process"],
+  correct:[0,1],
+  explain:"The begin event marks the commitment (‘I am starting to send this’). The end event marks acceptance (‘I believe this came from A’), so it goes after verification. It does not have to be the last statement."},
+ {type:"fill", title:"Make it injective",
+  prompt:"Require a distinct A run for every B run.",
+  code:`query x:pkey, y:pkey, z:bitstring;
+  {{a}}(eB(x,y,z)) ==> {{b}}(bA(x,y,z)).`,
+  blanks:{a:["inj-event"],b:["inj-event"]},
+  explain:"Note the hyphen: <code>inj-event</code>. On the original handshake this query is false: the attacker replays A’s first message to a second B session."},
+ {type:"mc", title:"Reading a mixed result",
+  question:"ProVerif prints <code>RESULT inj-event(eB(x,y,z)) ==> inj-event(bA(x,y,z)) is false. RESULT (even event(eB(x,y,z)) ==> event(bA(x,y,z)) is true.)</code>",
+  options:["Both properties are false","Non-injective agreement holds; only injectivity fails, so replays are possible","Injective agreement holds","ProVerif could not decide"],
+  correct:[1],
+  explain:"When an injective query fails, ProVerif also tries the weaker non-injective one and reports it with ‘even’."},
+ {type:"fill", title:"Nested correspondence (slide 45)",
+  prompt:"Express: whenever e(x1,x2) happens, an e2(x1,x2) happened before, and that e2 was itself preceded by e1(x1).",
+  code:`query x1:bitstring, x2:bitstring;
+  inj-event(e(x1,x2)) ==> {{a}}inj-event(e2(x1,x2)) ==> {{b}}{{c}}.`,
+  blanks:{a:["("],b:["inj-event(e1(x1))"],c:[")"]},
+  explain:"Parentheses nest one correspondence inside another. You can combine nested ones with <code>|</code> (or) and <code>&amp;&amp;</code> (and)."},
+ {type:"mc", title:"A query with no arrow",
+  question:"What does <code>query event(e(x1,x2)).</code> ask?",
+  options:["Whether e is ever executed: ProVerif tries to prove it never is","Whether e is executed in every trace","Whether e is injective","It is a syntax error"],
+  correct:[0],
+  explain:"This is the same form as the reachability check. ‘true’ means e never happens; ‘false’ means it can happen."},
+ {type:"mc", title:"Exam Sep 2026 – counting events (1)",
+  question:"<code>inj-event(endB(x,y)) ==> inj-event(beginB(x,y))</code> is false and <code>event(endB(x,y)) ==> event(beginB(x,y))</code> is true. A run contains n ≥ 1 occurrences of endB(a,b). How many beginB(a,b) can it contain?",
+  options:["Exactly n","At least n, no upper bound","At least 1, no upper bound","At least 0, at most n"],
+  correct:[2],
+  explain:"The non-injective property guarantees at least one earlier beginB(a,b). Injectivity failing means you cannot count on n of them. Nothing limits extra beginB events (sessions that never finish)."},
+ {type:"mc", title:"Exam Sep 2026 – counting events (2)",
+  question:"Same results. A run contains n occurrences of beginB(a,b). How many endB(a,b) can it contain?",
+  options:["0 to n","Exactly n","If n = 0, none; if n ≥ 1, from 0 with no upper bound","At least n"],
+  correct:[2],
+  explain:"With n = 0 there can be no endB(a,b) (non-injective property). With n ≥ 1, injectivity is false, so many endB may map to the same beginB: no upper bound. Minimum 0, since sessions may not finish."},
+ {type:"mc", title:"Counting events (3): both true",
+  question:"Now the injective query is <b>true</b>. A run contains n occurrences of endB(a,b). What do you know about beginB(a,b)?",
+  options:["Exactly n","At least n","At least 1","Nothing"],
+  correct:[1],
+  explain:"Injectivity maps each endB to a distinct earlier beginB, so there are at least n. There can be more (unfinished sessions)."},
+ {type:"mc", title:"Counting events (4): implications",
+  question:"Which combinations of results are possible?",
+  multi:true,
+  options:["injective true, non-injective true","injective false, non-injective true","injective true, non-injective false","injective false, non-injective false"],
+  correct:[0,1,3],
+  explain:"Injective agreement implies non-injective agreement, so ‘injective true, non-injective false’ is impossible."}
+ ]},
+/* ---------------------------------------------------------------- 6 */
+{id:"fix", title:"Lab 1 – fixing the handshake",
+ intro:`<p>The handshake fails injective authentication because A’s message can be replayed. The lab fix: B first sends a fresh nonce (a session id); A signs the nonce together with the key. Events must carry the nonce too, so different sessions are distinguishable.</p>`,
+ exercises:[
+ {type:"mc", title:"Lab 1.1 – the attack trace",
+  question:"In the trace for the failing injective query, what does the attacker do?",
+  options:["Forges A’s signature","Intercepts A’s first message and delivers it to two different B sessions, so two eB match one bA","Learns s","Decrypts the message with sk(kpB)"],
+  correct:[1],
+  explain:"Nothing in A’s message is tied to a particular B session, so a copy is accepted again. The key is still secret: this is a replay, not a secrecy break."},
+ {type:"fill", title:"Nonce-based fix",
+  prompt:"Complete the fixed protocol.",
+  code:`event bA(pkey, pkey, bitstring, bitstring).
+event eB(pkey, pkey, bitstring, bitstring).
+query x:pkey, y:pkey, n:bitstring, z:bitstring;
+  inj-event(eB(x,y,n,z)) ==> inj-event(bA(x,y,n,z)).
+
+let pA(kpA:keymat, pkB:pkey) =
+  in(c, {{a}});
+  new k:bitstring;
+  event bA(pk(kpA), pkB, xn, k);
+  out(c, penc(sign({{b}}, sk(kpA)), pkB));
+  in(c, x:bitstring);
+  let xs = sdec(x, k) in
+  0.
+
+let pB(kpB:keymat, pkA:pkey) =
+  {{c}};
+  out(c, n);
+  in(c, y:bitstring);
+  let y1 = pdec(y, sk(kpB)) in
+  if checksign(y1, pkA) = ok() then
+  let {{d}} = getmess(y1) in
+  event eB(pkA, pk(kpB), n, xk);
+  out(c, senc(s, xk));
+  0.`,
+  blanks:{a:["xn:bitstring"],b:["(xn,k)"],c:["new n:bitstring"],d:["(=n,xk:bitstring)"]},
+  hint:"B generates the nonce, A receives it as xn and signs the pair (xn, k). B accepts only if the first component equals its own n.",
+  explain:"A replayed message carries an old nonce, so the <code>=n</code> pattern fails in any other B session. Run it with <code>proverif -graph out file.pv</code> and check injectivity and reachability."},
+ {type:"order", title:"Order the fixed pB",
+  lines:["let pB(kpB:keymat, pkA:pkey) =","  new n:bitstring;","  out(c, n);","  in(c, y:bitstring);","  let y1 = pdec(y, sk(kpB)) in","  if checksign(y1, pkA) = ok() then","  let (=n, xk:bitstring) = getmess(y1) in","  event eB(pkA, pk(kpB), n, xk);","  out(c, senc(s, xk));","  0."]},
+ {type:"fill", title:"Authenticity of the secret (lab 1.3–1.4)",
+  prompt:"Check that what A decrypts was really sent by B. Use two secrets s1 and s2 so that a swap would be visible.",
+  code:`free s1:bitstring [private].
+free s2:bitstring [private].
+event sentS(bitstring).
+event recvS(bitstring).
+query x:bitstring; {{a}}(recvS(x)) ==> inj-event(sentS(x)).
+
+(* in pA, after decrypting *)
+  let xs = sdec(x, k) in
+  event {{b}};
+  0.
+
+(* in pB, parameterized by the secret sec *)
+  event sentS(sec);
+  out(c, senc({{c}}, xk));
+  0.
+
+process ... | !pB(kpB, pk(kpA), s1) | !pB(kpB, pk(kpA), {{d}})`,
+  blanks:{a:["inj-event"],b:["recvS(xs)"],c:["sec"],d:["s2"]},
+  explain:"With a single constant secret, a substitution would be invisible (s is always s). Two secrets let ProVerif detect whether A can receive s2 when B sent s1."},
+ {type:"mc", title:"Why the event must carry the nonce",
+  question:"In the fixed protocol, why add the nonce n to bA and eB?",
+  options:["Otherwise the events of different sessions with the same keys and key k would be indistinguishable","ProVerif requires every fresh name to appear in an event","To make n secret","It is optional and changes nothing"],
+  correct:[0],
+  explain:"Events describe what the parties agree on. Including the session id makes the agreement session-specific."}
+ ]},
+/* ---------------------------------------------------------------- 7 */
+{id:"phases", title:"Phases and forward secrecy",
+ intro:`<p><code>phase n; P</code> splits a run into sequential phases. When phase n starts, processes still in earlier phases stop. Forward secrecy: phase 0 = the sessions; phase 1 = later, when a long-term key leaks. If <code>attacker(s)</code> still holds, past sessions stay secret even after the compromise.</p>`,
+ exercises:[
+ {type:"fill", title:"Exam Feb 2025 – compromise kpA later",
+  prompt:"Add a component to the main process (after line 50) that leaks A’s long-term key after the sessions.",
+  code:`process
+  new kpA:keymat;
+  new kpB:keymat;
+  (
+    !out(c, pk(kpA)); 0
+  | !out(c, pk(kpB)); 0
+  | !pA(kpA, pk(kpB)) | !pB(kpB, pk(kpA))
+  | {{a}} 1; out(c, {{b}}); 0
+  )`,
+  blanks:{a:["phase"],b:["kpA"]},
+  explain:"Guarantee if proved: the attacker cannot derive s even if, after all phase-0 sessions are over, it learns A’s whole key pair kpA. Here it holds because k is encrypted with B’s public key, which kpA does not open."},
+ {type:"mc", title:"Same question, but kpB leaks",
+  question:"Replace <code>out(c, kpA)</code> with <code>out(c, kpB)</code> in phase 1. What happens to the secrecy of s?",
+  options:["Still secret: phase 0 is over","Broken: the attacker recorded penc(sign(k,sk(kpA)),pk(kpB)) and senc(s,k), decrypts the first with sk(kpB), gets k, then decrypts s","Broken only if the attacker can start new sessions in phase 1","ProVerif cannot model this"],
+  correct:[1],
+  explain:"The attacker keeps all recorded messages across phases. The protocol has no forward secrecy with respect to B’s key: one long-term key protects the session key."},
+ {type:"mc", title:"What does phase 1 model?",
+  question:"Which statement about the forward-secrecy model is correct?",
+  options:["The attacker gets the key while sessions are still running","No honest session runs in phase 1; the attacker reuses everything it saw in phase 0 plus the leaked key","Phase 1 runs before phase 0","Phase changes are triggered by the attacker sending a message"],
+  correct:[1],
+  explain:"Honest processes are all in phase 0, so they stop. The attacker keeps its knowledge."},
+ {type:"drag", title:"Build the forward-secrecy model",
+  template:`process
+  new kpA:keymat; new kpB:keymat;
+  ( !out(c, pk(kpA)); 0 | !out(c, pk(kpB)); 0
+  | !pA(kpA, pk(kpB)) | !pB(kpB, pk(kpA))
+  {{a}} {{b}} {{c}}; out(c, {{d}}); 0 )`,
+  slots:{a:"|",b:"phase",c:"1",d:"kpA"},
+  tokens:["|","phase","1","kpA","0","!","new","s"],
+  explain:"Phase numbers start at 0, which is the default. Leaking <code>s</code> itself would of course break secrecy and is not what we want to test."}
+ ]},
+/* ---------------------------------------------------------------- 8 */
+{id:"strong", title:"Strong secrecy and weak secrets",
+ intro:`<p><code>noninterf s.</code> asks for strong secrecy: the attacker cannot tell any difference between runs with different values of s (no partial knowledge).</p>
+<p><code>weaksecret s.</code> checks resistance to offline guessing: ProVerif compares a world where the attacker is later given the real s with one where it gets a fresh value. If it can tell them apart, a guess can be verified offline.</p>`,
+ exercises:[
+ {type:"fill", title:"The two queries",
+  prompt:"Write the strong-secrecy and weak-secret queries.",
+  code:`free s:bitstring [private].
+{{a}} s.     (* strong secrecy *)
+{{b}} s.     (* resistance to offline guessing *)`,
+  blanks:{a:["noninterf"],b:["weaksecret"]}},
+ {type:"drag", mode:"prose", title:"Three kinds of secrecy",
+  template:`The attacker can never derive the whole term s: {{a}}
+The attacker learns nothing at all about s: {{b}}
+The attacker cannot check a guess of s offline: {{c}}`,
+  slots:{a:"query attacker(s).",b:"noninterf s.",c:"weaksecret s."},
+  tokens:["query attacker(s).","noninterf s.","weaksecret s.","query event(s).","free s [private]."]},
+ {type:"fill", title:"How ProVerif checks weak secrets",
+  prompt:"Complete the equivalence from slide 53: the real secret on one side, a fresh value of the same type on the other.",
+  code:`( P | {{a}} 1; out(c, {{b}}) )  ≈S  ( P | phase 1; {{c}}; out(c, n') )`,
+  blanks:{a:["phase"],b:["n"],c:["new n':t","newn':t"]},
+  explain:"Phase 1 is the offline guessing phase. If the attacker can tell whether the value it is given is the real secret, it can test guesses."},
+ {type:"mc", title:"Strong secrecy, formally",
+  question:"P preserves strong secrecy of N from S-adversaries when:",
+  options:["P[x/N] ≈S P[x'/N] for any values x and x'","No trace outputs N","attacker(N) is false and N is private","P | phase 1; out(c,N) ≈S P"],
+  correct:[0],
+  explain:"Observational equivalence: no S-adversary can behave differently depending on which value replaced N."},
+ {type:"mc", title:"Lab 2.1 – the hash attack",
+  question:"Protocol: A→B <code>hash(s)</code>. Secrecy holds, but <code>weaksecret s</code> fails. What does the attacker do?",
+  options:["Inverts the hash","Records hash(s), then offline computes hash(g) for each guess g and compares","Replays hash(s) to B","Asks B to decrypt it"],
+  correct:[1],
+  explain:"If s has low entropy (a PIN, a password), the recorded hash lets the attacker test guesses without talking to the protocol again."},
+ {type:"mc", title:"One output, three verdicts",
+  question:"A process only does <code>out(c, hash(s))</code>, with s private. Which results do you expect?",
+  multi:true,
+  options:["query attacker(s): true (s is secret)","noninterf s: false","weaksecret s: false","noninterf s: true, because hash cannot be inverted"],
+  correct:[0,1,2],
+  explain:"Nobody can derive s, but the attacker can compare hash(s) with hash of any value it picks, which is exactly a difference between P[x/s] and P[x'/s], and also an offline guess test."},
+ {type:"fill", title:"Lab 2.2 – fix with a shared high-entropy secret",
+  prompt:"pS and pR share a long random key k. Hash it together with s so the attacker cannot check guesses.",
+  code:`free s:bitstring [private].
+free k:bitstring [{{a}}].
+weaksecret s.
+
+let pS() = out(c, hash({{b}})); 0.
+
+let pR() =
+  in(c, x:bitstring);
+  if x = {{c}} then 0.`,
+  blanks:{a:["private"],b:["(s,k)"],c:["hash((s,k))"]},
+  explain:"To verify a guess g the attacker would need hash((g,k)), but k is unknown and too large to guess."}
+ ]},
+/* ---------------------------------------------------------------- 9 */
+{id:"theory", title:"Theory you will be asked",
+ intro:`<p>Short open questions in the exam often test the concepts behind ProVerif: the Dolev-Yao model, symbolic vs computational proofs, how the tool works and what its answers mean.</p>`,
+ exercises:[
+ {type:"mc", title:"The Dolev-Yao attacker",
+  question:"What can the Dolev-Yao attacker do?",
+  multi:true,
+  options:["Read, delete, substitute and insert messages on public channels","Build new messages from its knowledge and apply any crypto operation with keys it knows","Start any number of sessions with honest participants","Guess a secret key","Get partial information about a secret, such as one bit"],
+  correct:[0,1,2],
+  explain:"Cryptography is perfect: no guessing, no partial knowledge (unless you check weak or strong secrecy explicitly)."},
+ {type:"mc", title:"Symbolic vs computational",
+  question:"Which statements describe <b>computational</b> models?",
+  multi:true,
+  options:["Data are bitstrings and primitives are algorithms","The attacker is any probabilistic polynomial-time algorithm","Proofs show success has negligible probability, usually by reduction to a hard problem","Crypto operations are algebraic operators with ideal properties","They model timing side channels"],
+  correct:[0,1,2],
+  explain:"The fourth option describes symbolic (Dolev-Yao) models. Neither approach models side channels such as timing."},
+ {type:"mc", title:"What flaws does ProVerif find?",
+  question:"Which kinds of problems can a Dolev-Yao verification by ProVerif reveal?",
+  multi:true,
+  options:["Logical flaws such as man-in-the-middle or replay","Weaknesses of the encryption algorithm itself","Timing side channels","Missing checks in the protocol design"],
+  correct:[0,3],
+  explain:"Cryptosystem flaws and side channels are outside the symbolic model."},
+ {type:"order", title:"How ProVerif works",
+  plain:true,
+  lines:["You write the protocol in the extended pi calculus, plus queries","ProVerif translates the model into Horn clauses and derivability queries","The resolution algorithm searches for a derivation of the bad fact","If none exists, the property is proved true","If one exists, attack reconstruction looks for a concrete trace"],
+  explain:"Possible outcomes: true (proved), false (attack trace found), cannot be proved (no trace reconstructed), or no termination."},
+ {type:"mc", title:"‘Cannot be proved’",
+  question:"ProVerif says a property <i>cannot be proved</i>. What do you know?",
+  options:["There is an attack","There is no attack","Resolution found a derivation, but attack reconstruction found no trace: it may be a false attack, or a real one it missed","The model has a type error"],
+  correct:[2],
+  explain:"Reconstruction is not exhaustive. Inspect the derivation, or try the simulator (<code>proverif interact</code>)."},
+ {type:"mc", title:"Approximation and soundness",
+  question:"About the Horn-clause abstraction, which are true?",
+  multi:true,
+  options:["It forgets how many times a message is sent","It may represent two different fresh names by the same name","If a property is proved on the Horn clauses, it holds on the pi-calculus model","If ProVerif finds a derivation, the pi-calculus model necessarily has an attack"],
+  correct:[0,1,2],
+  explain:"The clauses over-approximate the real traces: proofs are sound, but false attacks are possible."},
+ {type:"mc", title:"Unbounded sessions",
+  question:"Why can ProVerif prove properties for an unbounded number of sessions?",
+  options:["It enumerates all states up to a fixed depth","The Horn-clause abstraction does not track states or repetitions, so a finite set of clauses covers all sessions","It assumes at most two sessions","It uses probabilistic sampling"],
+  correct:[1],
+  explain:"Model checkers explore states and usually need a bounded number of sessions. ProVerif’s abstraction avoids the state explosion, at the price of possible false attacks and possible non-termination."},
+ {type:"mc", title:"Needham-Schroeder history",
+  question:"What is the lesson of the Needham-Schroeder public-key protocol?",
+  options:["It was broken by brute-forcing RSA","It was believed secure for years, until Lowe found a man-in-the-middle attack in 1995 with model checking","It was proved secure by ProVerif","It has a timing side channel"],
+  correct:[1],
+  explain:"Simple protocols with concurrent sessions are hard to analyse by hand; formal methods find such attacks."}
+ ]},
+/* ---------------------------------------------------------------- 10 */
+{id:"debug", title:"Attack traces and debugging",
+ intro:`<p>Exam questions often show a script and the attack trace from <code>proverif -graph</code>. Names like <code>a</code>, <code>a_1</code>, <code>a_2</code> in a trace are values the attacker made up. Practise reading traces and spotting model bugs.</p>`,
+ exercises:[
+ {type:"mc", title:"Names in the trace",
+  question:"In the trace the attacker sends <code>(sign((a,a_1),sk(a_2)),pk(a_2))</code>. What are a, a_1, a_2?",
+  options:["Honest session names","Fresh names created by the attacker","Free private names","Variables ProVerif could not resolve"],
+  correct:[1],
+  explain:"Here the attacker invents a software, a description and its own key pair a_2, and signs with it."},
+ {type:"mc", title:"Feb 2026 – why the query is false",
+  code:`let pR(pkS:pkey) =
+  in(c, y:bitstring);
+  let (s:bitstring, k:pkey) = y in
+  if checksign(s, k) = ok() then
+  ...`,
+  question:"Why does the attacker’s message above make <code>authenticated(a,a_1)</code> happen with no matching <code>issued</code>?",
+  options:["The attacker stole kpS","pR checks the signature with the key k carried in the message, so any self-signed package is accepted","getmess fails","The query has the wrong types"],
+  correct:[1],
+  explain:"The trusted key <code>pkS</code> is a parameter but never used. A key received from the network proves nothing."},
+ {type:"mc", title:"Jun 2026 – reading the hash trace",
+  code:`let pB() =
+  in(c, y:bitstring);
+  let (xda:bitstring, xh:bitstring) = y in
+  event receive(xda);
+  0.`,
+  question:"The attacker sends <code>(a, a_1)</code> and <code>receive(a)</code> happens. Why?",
+  options:["The attacker computed hash((a,s))","pB never checks xh, so any pair is accepted","s was leaked","send(a) happened before"],
+  correct:[1],
+  explain:"s is still secret (first query true). The missing check is the only problem."},
+ {type:"mc", title:"Spot the type error",
+  code:`free c:channel.
+let pA() =
+  in(c, x);
+  out(c, x); 0.`,
+  question:"The typed ProVerif front end rejects this. Why?",
+  options:["Missing type in the input: in(c, x:bitstring)","out cannot send a received variable","pA has no parameters","Channels must be private"],
+  correct:[0],
+  explain:"In the typed calculus every bound variable needs a type: inputs, patterns and query variables."},
+ {type:"mc", title:"Spot the declaration error",
+  code:`free c:channel.
+query x:bitstring; event(recv(x)) ==> event(sent(x)).
+let pA() = new m:bitstring; event sent(m); out(c, m); 0.
+let pB() = in(c, y:bitstring); event recv(y); 0.
+process !pA() | !pB()`,
+  question:"What is missing?",
+  options:["The declarations event sent(bitstring). and event recv(bitstring).","A [private] on c","A 0 after process","Nothing, it runs"],
+  correct:[0],
+  explain:"Events must be declared with their argument types before use."},
+ {type:"mc", title:"Spot the logic bug",
+  code:`let pB(kpB:keymat, pkA:pkey) =
+  in(c, y:bitstring);
+  let y1 = pdec(y, sk(kpA)) in
+  ...`,
+  question:"Assume kpA is in scope. What will ProVerif tell you about this pB?",
+  options:["An attack on s","pB never gets past pdec with honest messages, so the reachability query for pB is true (end not reachable)","A type error","Nothing changes"],
+  correct:[1],
+  explain:"A’s message is encrypted with pk(kpB), so decrypting with sk(kpA) fails. All secrecy queries then look fine. Reachability queries exist to catch this."},
+ {type:"drag", title:"Fix the bugs",
+  prompt:"Drag the correct pieces so this script is well typed and the receiver really checks the signature.",
+  template:`event accepted({{a}}).
+query x:bitstring; event(accepted(x)) {{b}} event(issued(x)).
+let pR(pkS:pkey) =
+  in(c, y:{{c}});
+  if checksign(y, {{d}}) = ok() then
+  let xm = getmess(y) in
+  event accepted(xm); 0.`,
+  slots:{a:"bitstring",b:"==>",c:"bitstring",d:"pkS"},
+  tokens:["bitstring","==>","bitstring","pkS","sk(kpS)","->","pkey","=>"],
+  explain:"The arrow is <code>==></code>; <code>-></code> and <code>=></code> are not valid here."}
+ ]},
+/* ---------------------------------------------------------------- 11 */
+{id:"exams", title:"Exam case studies",
+ intro:`<p>The ProVerif questions from past exams, plus close variants. For each one: say what the query means, why it fails, and write the fix.</p>`,
+ exercises:[
+ {type:"mc", title:"Jan 2025 – Needham-Schroeder query",
+  question:"Query: <code>event(eB(pk(kpA),pk(kpB),z)) ==> event(bA(pk(kpA),pk(kpB),z))</code>. What does it guarantee if true?",
+  options:["Whenever B (key pk(kpB)) completes a run apparently with A (pk(kpA)) on nonce pair z, A (pk(kpA)) has previously started a run with B (pk(kpB)) on the same nonce pair","Each B run matches a distinct A run","The nonces stay secret","A authenticates B"],
+  correct:[0],
+  explain:"Non-injective and one-directional (A to B). It fails for Needham-Schroeder: in Lowe’s attack A runs with E, so bA has pkE as second argument, not pk(kpB)."},
+ {type:"order", title:"Rebuild NS pA with its events",
+  lines:["let pA(kpA:keymat) =","  in(c, pkB:pkey);","  new nA:bitstring;","  out(c, penc((pk(kpA), nA), pkB));","  in(c, x:bitstring);","  let (=nA, xnB:bitstring) = pdec(x, sk(kpA)) in","  event bA(pk(kpA), pkB, (nA, xnB));","  out(c, penc(xnB, pkB));","  event endA();","  0."]},
+ {type:"fill", title:"Jan 2025 – add B-to-A authentication",
+  prompt:"Declare the new events and query, and place them. bB goes in pB between lines 33 and 34; eA goes in pA between lines 24 and 26.",
+  code:`event bB(pkey, pkey, bitstring).
+event eA(pkey, pkey, bitstring).
+query z:bitstring;
+  event(eA(pk(kpA), pk(kpB), z)) ==> event({{a}}).
+
+(* pB, after new nB, before out *)
+  event bB(pkA, pk(kpB), {{b}});
+
+(* pA, after the nonce check *)
+  event eA(pk(kpA), pkB, {{c}});`,
+  blanks:{a:["bB(pk(kpA),pk(kpB),z)"],b:["(xnA,nB)"],c:["(nA,xnB)"]},
+  explain:"Mirror of the first property: when A finishes believing it talked with B, B really ran with A on the same nonces. Keep the same argument order in both events."},
+ {type:"fill", title:"Lowe’s fix for Needham-Schroeder",
+  prompt:"Add B’s identity to message 2 so A can detect the man in the middle.",
+  code:`(* in pB *)
+  out(c, penc((xnA, nB, {{a}}), pkA));
+
+(* in pA *)
+  let (=nA, xnB:bitstring, {{b}}) = pdec(x, sk(kpA)) in`,
+  blanks:{a:["pk(kpB)"],b:["=pkB"]},
+  explain:"In the attack, A expects E’s key but message 2 now names B, so the <code>=pkB</code> check fails and A stops."},
+ {type:"mc", title:"Variant – A learns pkB from the network",
+  question:"In the slides’ handshake, change pA to <code>let pA(kpA:keymat) = in(c, pkB:pkey); ...</code> so A can talk to anyone. What breaks?",
+  options:["Nothing","Secrecy of s: A runs with the attacker’s key, the attacker decrypts, gets sign(k,sk(kpA)), re-encrypts it for B, and B sends senc(s,k) with a k the attacker knows","Only injectivity","Only reachability"],
+  correct:[1],
+  explain:"The signed message does not say who it is for, so it can be forwarded. Same structure as the Needham-Schroeder attack."},
+ {type:"fill", title:"Fix the variant: sign the recipient too",
+  code:`let pA(kpA:keymat) =
+  in(c, pkB:pkey);
+  new k:bitstring;
+  out(c, penc(sign({{a}}, sk(kpA)), pkB));
+  ...
+
+let pB(kpB:keymat, pkA:pkey) =
+  in(c, y:bitstring);
+  let y1 = pdec(y, sk(kpB)) in
+  if checksign(y1, pkA) = ok() then
+  let ({{b}}, xk:bitstring) = getmess(y1) in
+  out(c, senc(s, xk)); 0.`,
+  blanks:{a:["(pkB,k)"],b:["=pk(kpB)"]},
+  prompt:"A signs the intended recipient together with k; B checks that it is the recipient.",
+  explain:"A forwarded message names the attacker as recipient, so B’s <code>=pk(kpB)</code> pattern fails."},
+ {type:"fill", title:"Feb 2026 – software update signature",
+  prompt:"The receiver checks the signature with the key that came inside the message. Fix line 39.",
+  code:`let pR(pkS:pkey) =
+  in(c, y:bitstring);
+  let (s:bitstring, k:pkey) = y in
+  if checksign(s, {{a}}) = ok() then
+  let (ysw:bitstring, yswd:string) = getmess(s) in
+  event authenticated(ysw, yswd);
+  0.`,
+  blanks:{a:["pkS"]},
+  explain:"Query meaning: whenever the receiver accepts (sw, swd) as authentic, the issuer really issued that exact pair, which rules out fake software, fake metadata and mixed pairs. You could also write the pattern as <code>(s:bitstring, =pkS)</code>."},
+ {type:"order", title:"Order the fixed pR",
+  lines:["let pR(pkS:pkey) =","  in(c, y:bitstring);","  let (s:bitstring, k:pkey) = y in","  if checksign(s, pkS) = ok() then","  let (ysw:bitstring, yswd:string) = getmess(s) in","  event authenticated(ysw, yswd);","  0."]},
+ {type:"mc", title:"Feb 2026 – why sign the pair?",
+  question:"The issuer signs <code>(sw, swd)</code> together rather than signing sw and swd separately. Why?",
+  options:["It is faster","Separate signatures would let the attacker combine a genuine sw with the genuine swd of another package","ProVerif cannot sign two values","For confidentiality"],
+  correct:[1],
+  explain:"The property requires the exact issued pair. Signing them together binds them."},
+ {type:"fill", title:"Jun 2026 – hash integrity",
+  prompt:"pA sends <code>(da, hash((da, s)))</code> but pB never checks the hash. Fix pB.",
+  code:`let pB() =
+  in(c, y:bitstring);
+  let (xda:bitstring, xh:bitstring) = y in
+  {{a}} xh = {{b}} {{c}}
+  event receive(xda);
+  0.`,
+  blanks:{a:["if"],b:["hash((xda,s))"],c:["then"]},
+  explain:"Since s is secret, only an honest pA can build hash((da, s)). The check makes <code>event(receive(x)) ==> event(send(x))</code> true. It works like a MAC with key s."},
+ {type:"mc", title:"Jun 2026 – meaning of the two queries",
+  question:"<code>query attacker(s).</code> and <code>query x:bitstring; event(receive(x)) ==> event(send(x)).</code> What do they say?",
+  multi:true,
+  options:["The attacker can never derive the shared secret s","Whenever pB accepts a data item x, some pA previously sent that same x","Each receive matches a distinct send","The data da is secret"],
+  correct:[0,1],
+  explain:"The second query is non-injective: replays are allowed. da is sent in clear, so it is not secret."},
+ {type:"fill", title:"Secure SOME/IP – offerer authentication",
+  prompt:"Complete the injective query from the slides.",
+  code:`query off:cert, req:cert, srv:srvid, n:nonce, id:peerid, k:key;
+  {{a}}(end_off_auth(off, req, srv, n, id, k)) ==>
+  inj-event({{b}}(off, req, srv, n, id, {{c}})).`,
+  blanks:{a:["inj-event"],b:["begin_off_auth"],c:["k"]},
+  explain:"Meaning: each time the requester accepts the handshake as coming from offerer certO, for service srv, nonce n, peer id and key srvk, a distinct run of that offerer previously produced exactly these values. begin is placed in the offerer before its reply; end in the requester after its verifications."}
+ ]},
+/* ---------------------------------------------------------------- 12 */
+{id:"write", title:"Write full scripts",
+ intro:`<p>Being comfortable means writing a script from an empty file. Write each one, compare it with the checklist, then run it in ProVerif. The checklist only looks for key fragments; ProVerif is the real judge.</p>`,
+ exercises:[
+ {type:"write", title:"The handshake, from scratch",
+  prompt:"Write the whole sample handshake: declarations, crypto, secrecy query for s, reachability for both roles, both processes and the main process.",
+  starter:`(* types and channel *)
+
+(* crypto *)
+
+(* queries *)
+
+(* processes *)
+
+process
+`,
+  checks:[
+   ["Private secret s","free s:bitstring [private]."],
+   ["Secrecy query","query attacker(s)."],
+   ["Public-key decryption rule","pdec(penc(x,pk(y)),sk(y))=x"],
+   ["Signature check uses pk(y)","checksign(sign(m,sk(y)),pk(y))=ok()"],
+   ["A signs k with its secret key","sign(k,sk(kpA))"],
+   ["B decrypts with its own secret key","pdec(y,sk(kpB))"],
+   ["B sends s under the received key","senc(s,xk)"],
+   ["Main process publishes the public keys","out(c,pk(kpA))"]
+  ],
+  solution:`type pkey.
+type skey.
+type keymat.
+type result.
+
+free c:channel.
+free s:bitstring [private].
+
+fun penc(bitstring, pkey): bitstring.
+fun pk(keymat): pkey.
+fun sk(keymat): skey.
+reduc forall x:bitstring, y:keymat; pdec(penc(x, pk(y)), sk(y)) = x.
+
+fun ok(): result.
+fun sign(bitstring, skey): bitstring.
+reduc forall m:bitstring, y:keymat; getmess(sign(m, sk(y))) = m.
+reduc forall m:bitstring, y:keymat; checksign(sign(m, sk(y)), pk(y)) = ok().
+
+fun senc(bitstring, bitstring): bitstring.
+reduc forall x:bitstring, y:bitstring; sdec(senc(x, y), y) = x.
+
+event endA.
+event endB.
+query attacker(s).
+query event(endA).
+query event(endB).
+
+let pA(kpA:keymat, pkB:pkey) =
+  new k:bitstring;
+  out(c, penc(sign(k, sk(kpA)), pkB));
+  in(c, x:bitstring);
+  let xs = sdec(x, k) in
+  event endA;
+  0.
+
+let pB(kpB:keymat, pkA:pkey) =
+  in(c, y:bitstring);
+  let y1 = pdec(y, sk(kpB)) in
+  if checksign(y1, pkA) = ok() then
+  let xk = getmess(y1) in
+  out(c, senc(s, xk));
+  event endB;
+  0.
+
+process
+  new kpA:keymat;
+  new kpB:keymat;
+  ( !out(c, pk(kpA)); 0
+  | !out(c, pk(kpB)); 0
+  | !pA(kpA, pk(kpB)) | !pB(kpB, pk(kpA)) )`},
+ {type:"write", title:"Lab 3 – software-update protocol",
+  prompt:"An issuer with a key pair generates its own sw and swd, signs the pair and sends it; a receiver checks the signature with the trusted public key and accepts. Prove that only issued pairs are accepted.",
+  starter:`(* types and channel *)
+
+(* signatures *)
+
+(* events and query *)
+
+(* issuer *)
+
+(* receiver *)
+
+process
+`,
+  checks:[
+   ["Declares a public channel","free c:channel."],
+   ["Signature destructor checksign uses pk(y)","checksign(sign(m,sk(y)),pk(y))=ok()"],
+   ["Issuer generates fresh software","new sw:bitstring"],
+   ["Issuer signs the pair (sw, swd)","sign((sw,swd),sk("],
+   ["Receiver checks with a trusted key, not one from the message","checksign(y,pkS)"],
+   ["Correspondence query on accepted ==> issued","==>event(issued("],
+   ["Public key is published","out(c,pk(kpS))"]
+  ],
+  solution:`type pkey.
+type skey.
+type keymat.
+type result.
+
+free c:channel.
+
+fun pk(keymat): pkey.
+fun sk(keymat): skey.
+fun ok(): result.
+fun sign(bitstring, skey): bitstring.
+reduc forall m:bitstring, y:keymat; getmess(sign(m, sk(y))) = m.
+reduc forall m:bitstring, y:keymat; checksign(sign(m, sk(y)), pk(y)) = ok().
+
+event issued(bitstring, bitstring).
+event accepted(bitstring, bitstring).
+event endR.
+
+query x:bitstring, y:bitstring; event(accepted(x,y)) ==> event(issued(x,y)).
+query event(endR).   (* sanity check: should be false *)
+
+let pS(kpS:keymat) =
+  new sw:bitstring;
+  new swd:bitstring;
+  event issued(sw, swd);
+  out(c, sign((sw, swd), sk(kpS)));
+  0.
+
+let pR(pkS:pkey) =
+  in(c, y:bitstring);
+  if checksign(y, pkS) = ok() then
+  let (xsw:bitstring, xswd:bitstring) = getmess(y) in
+  event accepted(xsw, xswd);
+  event endR;
+  0.
+
+process
+  new kpS:keymat;
+  ( !out(c, pk(kpS)); 0 | !pS(kpS) | !pR(pk(kpS)) )`},
+ {type:"write", title:"Integrity with a MAC",
+  prompt:"A and B share a private key k. A sends a fresh message m with its MAC; B checks it. Prove that B only accepts messages A sent, and check reachability.",
+  starter:`type key.
+free c:channel.
+free k:key [private].
+
+`,
+  checks:[
+   ["MAC constructor","fun mac(bitstring,key):bitstring."],
+   ["A sends the pair (m, mac(m,k))","out(c,(m,mac(m,k)))"],
+   ["B checks the MAC before accepting","mac(xm,k)"],
+   ["Correspondence query","==>event(sent("]
+  ],
+  solution:`type key.
+free c:channel.
+free k:key [private].
+
+fun mac(bitstring, key): bitstring.
+
+event sent(bitstring).
+event accepted(bitstring).
+query x:bitstring; event(accepted(x)) ==> event(sent(x)).
+query x:bitstring; event(accepted(x)).   (* reachability: should be false *)
+
+let pA() =
+  new m:bitstring;
+  event sent(m);
+  out(c, (m, mac(m, k)));
+  0.
+
+let pB() =
+  in(c, (xm:bitstring, xt:bitstring));
+  if xt = mac(xm, k) then
+  event accepted(xm);
+  0.
+
+process !pA() | !pB()`}
+ ]}
+];
+
+/* =========================================================================
+   ENGINE
+   ========================================================================= */
+const STORE_KEY = "pvworkbook.v1";
+let progress = {};
+try { progress = JSON.parse(localStorage.getItem(STORE_KEY) || "{}") || {}; } catch(e){ progress = {}; }
+function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(progress)); } catch(e){} }
+
+const norm = s => (s||"").replace(/\s+/g,"");
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+const KW = ["type","free","fun","reduc","forall","query","event","inj-event","let","in","out","new","if","then","else","process","phase","noninterf","weaksecret","private","attacker","not","letfun","const","equation","table","insert","get"];
+const TY = ["bitstring","channel","bool","time","key","pkey","skey","keymat","result","nonce","string","cert","srvid","peerid"];
+const FN = ["senc","sdec","penc","pdec","pk","sk","sign","checksign","getmess","hash","mac","checkmac","ok"];
+function highlight(src){
+  const re = /(\(\*[\s\S]*?\*\))|(inj-event|[A-Za-z_][A-Za-z0-9_']*)|(==>|[!|;=.:,()\[\]])|([^A-Za-z_(=!|;.:,)\[\]]+|\()/g;
+  let out = "", m;
+  while((m = re.exec(src))){
+    if(m[1]) out += `<span class="c">${esc(m[1])}</span>`;
+    else if(m[2]){
+      const w = m[2];
+      if(KW.includes(w)) out += `<span class="k">${w}</span>`;
+      else if(TY.includes(w)) out += `<span class="t">${w}</span>`;
+      else if(FN.includes(w)) out += `<span class="f">${w}</span>`;
+      else out += esc(w);
+    }
+    else if(m[3]) out += `<span class="pn">${esc(m[3])}</span>`;
+    else out += esc(m[0]);
+  }
+  return out;
+}
+
+const KIND = {fill:"fill in", drag:"drag and drop", order:"put in order", mc:"choose", write:"write"};
+const stepsEl = document.getElementById("steps");
+const mainEl = document.getElementById("main");
+
+function exKey(mi, ei){ return MODULES[mi].id + ":" + ei; }
+function moduleDone(mi){ return MODULES[mi].exercises.filter((_,ei)=>progress[exKey(mi,ei)]).length; }
+
+let currentIdx = 0;
+function renderNav(current){
+  stepsEl.innerHTML = MODULES.map((m,i)=>{
+    const d = moduleDone(i), t = m.exercises.length;
+    return `<li><a href="#${m.id}" class="${i===current?'active':''}" ${i===current?'aria-current="page"':''}>
+      <span class="n">${i+1}</span><span>${m.title}</span><span class="p ${d===t?'full':''}">${d}/${t}</span></a></li>`;
+  }).join("") + `<li class="sep"></li>
+  <li><a href="#drill" class="${current===-2?'active':''}"><span class="n">↻</span><span>Random exam drill</span><span></span></a></li>
+  <li><a href="#cheatsheet" class="${current===-1?'active':''}"><span class="n">≡</span><span>Syntax cheat sheet</span><span></span></a></li>`;
+  let done=0,total=0; MODULES.forEach((m,i)=>{done+=moduleDone(i); total+=m.exercises.length;});
+  document.getElementById("totalProgress").textContent = `${done} of ${total} exercises solved`;
+}
+
+function verdictLine(el, ok, title, failMsg){
+  el.className = "verdict show " + (ok?"true":"false");
+  el.innerHTML = ok
+    ? `RESULT <b>${esc(title)}</b> is true.`
+    : `RESULT <b>${esc(title)}</b> cannot be proved. ${failMsg||"Check the red parts."}`;
+}
+function markDone(mi, ei, card){
+  progress[exKey(mi,ei)] = true; save();
+  const b = card.querySelector(".badge"); b.textContent = "solved"; b.classList.add("done");
+  renderNav(currentIdx);
+}
+function tail(ex){
+  return `<div class="verdict" aria-live="polite"></div>
+    ${ex.hint?`<div class="hint">${ex.hint}</div>`:''}
+    ${ex.explain?`<div class="explain">${ex.explain}</div>`:''}`;
+}
+function solved(card){ card.querySelector(".explain")?.classList.add("show"); }
+
+/* ---- fill ---- */
+function buildFill(ex, mi, ei, card){
+  const parts = ex.code.split(/\{\{(\w+)\}\}/);
+  let html = "";
+  parts.forEach((p,i)=>{
+    if(i%2===0) html += highlight(p);
+    else {
+      const ans = ex.blanks[p]; const w = Math.max(3, ...ans.map(a=>a.length)) + 1;
+      html += `<input class="blank" data-id="${p}" size="${w}" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="blank">`;
+    }
+  });
+  card.insertAdjacentHTML("beforeend", `${ex.prompt?`<p class="ex-prompt">${ex.prompt}</p>`:''}<pre class="code">${html}</pre>
+    <div class="actions">
+      <button class="btn primary" data-act="check">Check</button>
+      ${ex.hint?'<button class="btn" data-act="hint">Hint</button>':''}
+      <button class="btn" data-act="reveal">Show answer</button>
+      <button class="btn" data-act="clear">Clear</button>
+    </div>${tail(ex)}`);
+  const inputs = [...card.querySelectorAll(".blank")];
+  const verdict = card.querySelector(".verdict");
+  const check = () => {
+    let all = true;
+    inputs.forEach(inp=>{
+      const ok = ex.blanks[inp.dataset.id].some(a=>norm(a)===norm(inp.value));
+      inp.classList.toggle("right", ok); inp.classList.toggle("wrong", !ok);
+      if(!ok) all = false;
+    });
+    verdictLine(verdict, all, ex.title);
+    if(all){ solved(card); markDone(mi,ei,card); }
+  };
+  inputs.forEach(inp=>{
+    inp.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); check(); } });
+    inp.addEventListener("input", ()=>inp.classList.remove("right","wrong"));
+  });
+  card.addEventListener("click", e=>{
+    const a = e.target.dataset.act; if(!a) return;
+    if(a==="check") check();
+    if(a==="hint") card.querySelector(".hint").classList.toggle("show");
+    if(a==="reveal"){ inputs.forEach(inp=>{ inp.value = ex.blanks[inp.dataset.id][0]; }); check(); }
+    if(a==="clear"){ inputs.forEach(inp=>{ inp.value=""; inp.classList.remove("right","wrong"); }); verdict.className="verdict"; inputs[0]?.focus(); }
+  });
+}
+
+/* ---- drag and drop (mouse drag, or tap a piece then a slot) ---- */
+function buildDrag(ex, mi, ei, card){
+  const slotHtml = id => `<span class="slot" data-id="${id}" tabindex="0" role="button" aria-label="empty slot"></span>`;
+  let body;
+  if(ex.mode==="prose"){
+    body = `<div class="prose-drag">${ex.template.split("\n").map(line=>{
+      const parts=line.split(/\{\{(\w+)\}\}/);
+      return `<div class="row">${parts.map((p,i)=> i%2 ? slotHtml(p) : esc(p)).join("")}</div>`;
+    }).join("")}</div>`;
+  } else {
+    const parts = ex.template.split(/\{\{(\w+)\}\}/);
+    body = `<pre class="code">${parts.map((p,i)=> i%2 ? slotHtml(p) : highlight(p)).join("")}</pre>`;
+  }
+  const order = shuffle(ex.tokens.map((_,i)=>i));
+  card.insertAdjacentHTML("beforeend", `${ex.prompt?`<p class="ex-prompt">${ex.prompt}</p>`:''}${body}
+    <p class="bank-label">Drag a piece into a slot, or tap a piece and then a slot. Tap a filled slot to send its piece back.</p>
+    <div class="bank">${order.map(i=>`<button class="tok" draggable="true" data-i="${i}">${esc(ex.tokens[i])}</button>`).join("")}</div>
+    <div class="actions">
+      <button class="btn primary" data-act="check">Check</button>
+      ${ex.hint?'<button class="btn" data-act="hint">Hint</button>':''}
+      <button class="btn" data-act="reveal">Show answer</button>
+      <button class="btn" data-act="clear">Clear</button>
+    </div>${tail(ex)}`);
+  const slots = [...card.querySelectorAll(".slot")];
+  const toks = [...card.querySelectorAll(".tok")];
+  const tokBtn = i => toks.find(t=>t.dataset.i===String(i));
+  let selected = null;
+  const deselect = () => { toks.forEach(t=>t.classList.remove("sel")); selected=null; };
+  function unplace(slot){
+    if(slot.dataset.i){ tokBtn(slot.dataset.i).hidden=false; }
+    slot.dataset.i=""; slot.textContent=""; slot.classList.remove("filled","right","wrong"); slot.setAttribute("aria-label","empty slot");
+  }
+  function place(slot, i){
+    slots.forEach(s=>{ if(s.dataset.i===String(i)) unplace(s); });
+    unplace(slot);
+    slot.dataset.i = i; slot.textContent = ex.tokens[i]; slot.classList.add("filled");
+    slot.setAttribute("aria-label","slot: "+ex.tokens[i]);
+    tokBtn(i).hidden = true; deselect();
+  }
+  toks.forEach(t=>{
+    t.addEventListener("click", ()=>{ const was = t.classList.contains("sel"); deselect(); if(!was){ t.classList.add("sel"); selected=t.dataset.i; } });
+    t.addEventListener("dragstart", e=>{ e.dataTransfer.setData("text/plain", t.dataset.i); e.dataTransfer.effectAllowed="move"; });
+  });
+  slots.forEach(s=>{
+    const act = ()=>{ if(selected!==null) place(s, selected); else unplace(s); };
+    s.addEventListener("click", act);
+    s.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); act(); } });
+    s.addEventListener("dragover", e=>{ e.preventDefault(); s.classList.add("over"); });
+    s.addEventListener("dragleave", ()=>s.classList.remove("over"));
+    s.addEventListener("drop", e=>{ e.preventDefault(); s.classList.remove("over"); const i=e.dataTransfer.getData("text/plain"); if(i!=="") place(s, i); });
+  });
+  const verdict = card.querySelector(".verdict");
+  const check = ()=>{
+    let all = true;
+    slots.forEach(s=>{
+      const ok = !!s.dataset.i && norm(ex.tokens[s.dataset.i])===norm(ex.slots[s.dataset.id]);
+      s.classList.toggle("right", ok); s.classList.toggle("wrong", !ok);
+      if(!ok) all=false;
+    });
+    verdictLine(verdict, all, ex.title);
+    if(all){ solved(card); markDone(mi,ei,card); }
+  };
+  card.addEventListener("click", e=>{
+    const a = e.target.dataset.act; if(!a) return;
+    if(a==="check") check();
+    if(a==="hint") card.querySelector(".hint").classList.toggle("show");
+    if(a==="clear"){ slots.forEach(unplace); deselect(); verdict.className="verdict"; }
+    if(a==="reveal"){
+      slots.forEach(unplace);
+      slots.forEach(s=>{
+        const want = norm(ex.slots[s.dataset.id]);
+        const i = ex.tokens.findIndex((t,ti)=> norm(t)===want && !slots.some(o=>o.dataset.i===String(ti)));
+        if(i>=0) place(s, i);
+      });
+      check();
+    }
+  });
+}
+
+/* ---- ordering ---- */
+function buildOrder(ex, mi, ei, card){
+  const L = ex.lines.map((l,i)=>Array.isArray(l)?{t:l[0],r:l[1]}:{t:l,r:i});
+  const isRight = ord => ord.every((x,k)=> k===0 || L[ord[k-1]].r <= L[x].r);
+  let ord = shuffle(L.map((_,i)=>i)); let tries=0;
+  while(isRight(ord) && tries++<20) ord = shuffle(ord);
+  card.insertAdjacentHTML("beforeend", `<p class="ex-prompt">${ex.prompt||"Drag the lines into the correct order, or use the arrow buttons."}</p>
+    <ol class="order code"></ol>
+    <div class="actions">
+      <button class="btn primary" data-act="check">Check</button>
+      <button class="btn" data-act="reveal">Show answer</button>
+      <button class="btn" data-act="shuffle">Shuffle</button>
+    </div>${tail(ex)}`);
+  const list = card.querySelector(".order");
+  let dragFrom = null;
+  function draw(marks){
+    list.innerHTML = ord.map((li,pos)=>`<li class="order-item ${ex.plain?'plain':''} ${marks?marks[pos]:''}" draggable="true" data-pos="${pos}">
+      <span class="grip" aria-hidden="true">⋮⋮</span>
+      <span class="line">${ex.plain?esc(L[li].t):highlight(L[li].t)}</span>
+      <span class="mv"><button data-mv="-1" aria-label="move up" ${pos===0?'disabled':''}>▲</button><button data-mv="1" aria-label="move down" ${pos===ord.length-1?'disabled':''}>▼</button></span>
+    </li>`).join("");
+    [...list.children].forEach(item=>{
+      const pos = +item.dataset.pos;
+      item.addEventListener("dragstart", e=>{ dragFrom=pos; item.classList.add("dragging"); e.dataTransfer.setData("text/plain", String(pos)); e.dataTransfer.effectAllowed="move"; });
+      item.addEventListener("dragend", ()=>item.classList.remove("dragging"));
+      item.addEventListener("dragover", e=>{ e.preventDefault(); item.classList.add("over"); });
+      item.addEventListener("dragleave", ()=>item.classList.remove("over"));
+      item.addEventListener("drop", e=>{ e.preventDefault(); if(dragFrom===null) return; const [x]=ord.splice(dragFrom,1); ord.splice(pos,0,x); dragFrom=null; draw(); });
+      item.querySelectorAll("[data-mv]").forEach(b=>b.addEventListener("click", ev=>{
+        ev.stopPropagation(); const d=+b.dataset.mv, to=pos+d; if(to<0||to>=ord.length) return;
+        [ord[pos],ord[to]]=[ord[to],ord[pos]]; draw(); list.children[to]?.querySelector(`[data-mv="${d}"]`)?.focus();
+      }));
+    });
+  }
+  draw();
+  const verdict = card.querySelector(".verdict");
+  const sortedRanks = L.map(x=>x.r).sort((a,b)=>a-b);
+  const check = ()=>{
+    const marks = ord.map((li,pos)=> L[li].r===sortedRanks[pos] ? "right" : "wrong");
+    draw(marks);
+    const ok = isRight(ord);
+    verdictLine(verdict, ok, ex.title, "Lines with a red border are in the wrong place.");
+    if(ok){ solved(card); markDone(mi,ei,card); }
+  };
+  card.addEventListener("click", e=>{
+    const a = e.target.dataset.act; if(!a) return;
+    if(a==="check") check();
+    if(a==="reveal"){ ord = L.map((_,i)=>i).sort((x,y)=>L[x].r-L[y].r); check(); }
+    if(a==="shuffle"){ ord = shuffle(ord); draw(); verdict.className="verdict"; }
+  });
+}
+
+/* ---- multiple choice ---- */
+function buildMC(ex, mi, ei, card){
+  const name = "q"+mi+"_"+ei+"_"+Math.random().toString(36).slice(2,6), t = ex.multi ? "checkbox" : "radio";
+  card.insertAdjacentHTML("beforeend", `${ex.code?`<pre class="code mc-code">${highlight(ex.code)}</pre>`:''}
+    <p class="ex-prompt">${ex.question}${ex.multi?' <i>(select all that apply)</i>':''}</p>
+    <div class="opts">${ex.options.map((o,i)=>`<label class="opt"><input type="${t}" name="${name}" value="${i}"><span>${o}</span></label>`).join("")}</div>
+    <div class="actions"><button class="btn primary" data-act="check">Check</button></div>${tail(ex)}`);
+  card.querySelector('[data-act="check"]').addEventListener("click", ()=>{
+    const boxes = [...card.querySelectorAll(".opts input")];
+    const chosen = boxes.filter(b=>b.checked).map(b=>+b.value);
+    const ok = chosen.length===ex.correct.length && chosen.every(c=>ex.correct.includes(c));
+    boxes.forEach(b=>{
+      const lab = b.closest(".opt"); lab.classList.remove("right","wrong");
+      if(ex.correct.includes(+b.value) && (ok || b.checked)) lab.classList.add("right");
+      else if(b.checked) lab.classList.add("wrong");
+    });
+    verdictLine(card.querySelector(".verdict"), ok, ex.title, ex.multi?"Some choices are missing or wrong.":"Try another option.");
+    if(ok){ solved(card); markDone(mi,ei,card); }
+  });
+}
+
+/* ---- free writing ---- */
+function buildWrite(ex, mi, ei, card){
+  const key = "draft:"+exKey(mi,ei);
+  card.insertAdjacentHTML("beforeend", `<p class="ex-prompt">${ex.prompt}</p>
+    <textarea class="write" spellcheck="false" aria-label="your ProVerif script"></textarea>
+    <div class="actions">
+      <button class="btn primary" data-act="check">Check against checklist</button>
+      <button class="btn" data-act="sol">Show model answer</button>
+      <button class="btn" data-act="copy">Copy my script</button>
+    </div>
+    <ul class="checklist"></ul>
+    <div class="verdict" aria-live="polite"></div>
+    <div class="solution"><pre class="code">${highlight(ex.solution)}</pre></div>`);
+  const ta = card.querySelector("textarea");
+  ta.value = progress[key] || ex.starter;
+  ta.addEventListener("input", ()=>{ progress[key]=ta.value; save(); });
+  ta.addEventListener("keydown", e=>{
+    if(e.key==="Tab" && !e.shiftKey){ e.preventDefault(); const s=ta.selectionStart; ta.value=ta.value.slice(0,s)+"  "+ta.value.slice(ta.selectionEnd); ta.selectionStart=ta.selectionEnd=s+2; }
+  });
+  card.addEventListener("click", e=>{
+    const a = e.target.dataset.act; if(!a) return;
+    if(a==="check"){
+      const src = norm(ta.value); let all = true;
+      card.querySelector(".checklist").innerHTML = ex.checks.map(([label,snip])=>{
+        const ok = src.includes(norm(snip)); if(!ok) all=false;
+        return `<li class="${ok?'okc':'miss'}">${ok?'✓':'✗'} ${label}</li>`;
+      }).join("");
+      verdictLine(card.querySelector(".verdict"), all, ex.title, "Some checklist items are missing.");
+      if(all) markDone(mi,ei,card);
+    }
+    if(a==="sol") card.querySelector(".solution").classList.toggle("show");
+    if(a==="copy"){ navigator.clipboard?.writeText(ta.value).then(()=>{ e.target.textContent="Copied"; setTimeout(()=>e.target.textContent="Copy my script",1500); }).catch(()=>{}); }
+  });
+}
+
+/* ---- pages ---- */
+function makeCard(mi, ei, showFrom){
+  const ex = MODULES[mi].exercises[ei];
+  const card = document.createElement("section");
+  card.className = "ex";
+  const done = progress[exKey(mi,ei)];
+  card.innerHTML = `<div class="ex-head"><h2>${ex.title}</h2><span class="ex-meta"><span class="kind">${KIND[ex.type]}</span><span class="badge ${done?'done':''}">${done?'solved':'to do'}</span></span></div>
+    ${showFrom?`<p class="from">From step ${mi+1}: ${MODULES[mi].title}</p>`:''}`;
+  mainEl.appendChild(card);
+  ({fill:buildFill, drag:buildDrag, order:buildOrder, mc:buildMC, write:buildWrite})[ex.type](ex,mi,ei,card);
+}
+
+function renderModule(mi){
+  currentIdx = mi;
+  const m = MODULES[mi];
+  mainEl.innerHTML = `<h1>${mi+1}. ${m.title}</h1><div class="intro">${m.intro}</div>`;
+  m.exercises.forEach((_,ei)=>makeCard(mi,ei,false));
+  const prev = MODULES[mi-1], next = MODULES[mi+1];
+  mainEl.insertAdjacentHTML("beforeend", `<div class="nextprev">
+    ${prev?`<a class="btn" href="#${prev.id}">Previous: ${prev.title}</a>`:'<span></span>'}
+    ${next?`<a class="btn primary" href="#${next.id}">Next: ${next.title}</a>`:`<a class="btn primary" href="#drill">Start a random drill</a>`}
+  </div>`);
+  renderNav(mi);
+}
+
+function renderDrill(){
+  currentIdx = -2;
+  const pool = [];
+  MODULES.forEach((m,mi)=>m.exercises.forEach((ex,ei)=>{ if(ex.type!=="write") pool.push([mi,ei]); }));
+  const unsolved = pool.filter(([mi,ei])=>!progress[exKey(mi,ei)]);
+  const pick = shuffle(unsolved.length>=8 ? unsolved : pool).slice(0,8);
+  mainEl.innerHTML = `<h1>Random exam drill</h1>
+    <p class="lead">Eight exercises picked from every step, unsolved ones first. Answer them without looking back, like in the exam.</p>
+    <div class="actions"><button class="btn primary" id="newDrill">New drill</button></div>`;
+  pick.forEach(([mi,ei])=>makeCard(mi,ei,true));
+  mainEl.insertAdjacentHTML("beforeend", `<div class="nextprev"><span></span><button class="btn primary" id="newDrill2">New drill</button></div>`);
+  document.getElementById("newDrill").onclick = document.getElementById("newDrill2").onclick = ()=>{ renderDrill(); window.scrollTo(0,0); };
+  renderNav(-2);
+}
+
+function renderCheat(){
+  currentIdx = -1;
+  const rows = (list)=>`<div class="cheat-wrap"><table><tbody>${list.map(([a,b])=>`<tr><td>${esc(a)}</td><td>${b}</td></tr>`).join("")}</tbody></table></div>`;
+  mainEl.innerHTML = `<div class="cheat"><h1>Syntax cheat sheet</h1>
+  <p class="lead">Everything the course uses, on one page. Run a script with <code>proverif file.pv</code>, get attack graphs with <code>proverif -graph dir file.pv</code>, simulate with <code>proverif interact file.pv</code>.</p>
+  <h2>Declarations</h2>${rows([
+   ["type key.","new type"],
+   ["free c:channel.","public global name"],
+   ["free s:bitstring [private].","name unknown to the attacker at start"],
+   ["fun f(T1,T2): T.","constructor (one-way)"],
+   ["reduc forall x:T1, y:T2; d(f(x,y), y) = x.","destructor with a rewrite rule"],
+   ["event e(T1, T2).   event e.","event declaration (with and without arguments)"]])}
+  <h2>Processes</h2>${rows([
+   ["let p(x:T) = P.","process macro"],
+   ["new n:T; P","fresh name"],
+   ["out(c, M); P","send M on c"],
+   ["in(c, x:T); P","receive into x"],
+   ["let (x:T, =N) = M in P else Q","pattern match / destructor; else if it fails"],
+   ["let (=pk(kpB), xk:bitstring) = M in P","equality test on a computed term"],
+   ["if M = N then P else Q","test"],
+   ["event e(M); P","record an event"],
+   ["P | Q      !P      0","parallel, replication, stop"],
+   ["phase 1; P","run P in phase 1"],
+   ["process P","main process"]])}
+  <h2>Queries</h2>${rows([
+   ["query attacker(s).","secrecy"],
+   ["query event(endA).","reachability / ‘never happens’; false = reachable"],
+   ["query x:T; event(e(x)) ==> event(b(x)).","non-injective correspondence"],
+   ["query x:T; inj-event(e(x)) ==> inj-event(b(x)).","injective correspondence"],
+   ["query x:T; inj-event(e(x)) ==> (inj-event(e2(x)) ==> inj-event(e1(x))).","nested correspondence"],
+   ["noninterf s.","strong secrecy"],
+   ["weaksecret s.","resistance to offline guessing"]])}
+  <h2>Standard primitives</h2>${rows([
+   ["fun senc(bitstring,key): bitstring.\nreduc forall m:bitstring,k:key; sdec(senc(m,k),k) = m.","symmetric encryption"],
+   ["fun penc(bitstring,pkey): bitstring.\nfun pk(keymat): pkey.  fun sk(keymat): skey.\nreduc forall x:bitstring,y:keymat; pdec(penc(x,pk(y)),sk(y)) = x.","public-key encryption"],
+   ["fun ok(): result.\nfun sign(bitstring,skey): bitstring.\nreduc forall m:bitstring,y:keymat; getmess(sign(m,sk(y))) = m.\nreduc forall m:bitstring,y:keymat; checksign(sign(m,sk(y)),pk(y)) = ok().","signatures"],
+   ["fun hash(bitstring): bitstring.","hash, no destructor"],
+   ["fun mac(bitstring,key): bitstring.\nreduc forall m:bitstring,k:key; checkmac(mac(m,k),m,k) = ok().","MAC"]])}
+  <h2>Exam patterns</h2>${rows([
+   ["replay → inj-event false","add a nonce from the receiver and sign it with the data"],
+   ["message forwarded to another party","put the recipient’s identity inside the signature or ciphertext"],
+   ["key received from the network","check signatures with a trusted key passed as parameter"],
+   ["data accepted without check","add a signature, MAC or keyed-hash check before the end event"],
+   ["forward secrecy","| phase 1; out(c, longTermKey); 0 in the main process"],
+   ["low-entropy secret leaked by hash","mix in a high-entropy shared secret: hash((s,k))"]])}
+  <h2>Common mistakes</h2>${rows([
+   ["forgetting the final .","every declaration and macro ends with a period"],
+   ["inj_event","the keyword is inj-event, with a hyphen"],
+   ["checksign(..., sk(y))","verification uses pk(y)"],
+   ["in(c, x);","typed inputs need a type: in(c, x:bitstring);"],
+   ["undeclared event","declare event e(types). before using it"],
+   ["events with different argument order","both sides of ==> must describe the same session parameters"]])}
+  </div>`;
+  renderNav(-1);
+}
+
+function route(){
+  const h = location.hash.slice(1);
+  if(h==="cheatsheet") renderCheat();
+  else if(h==="drill") renderDrill();
+  else { const i = MODULES.findIndex(m=>m.id===h); renderModule(i<0?0:i); }
+  document.getElementById("side").classList.remove("open");
+  document.getElementById("menuBtn").setAttribute("aria-expanded","false");
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange", route);
+
+document.getElementById("menuBtn").addEventListener("click", e=>{
+  const s = document.getElementById("side"); s.classList.toggle("open");
+  e.currentTarget.setAttribute("aria-expanded", s.classList.contains("open"));
+});
+document.getElementById("resetBtn").addEventListener("click", ()=>{
+  if(confirm("Erase all your progress and drafts?")){ progress = {}; save(); route(); }
+});
+document.getElementById("themeBtn").addEventListener("click", ()=>{
+  const r = document.documentElement;
+  const dark = r.dataset.theme ? r.dataset.theme==="dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  r.dataset.theme = dark ? "light" : "dark";
+  try{ localStorage.setItem("pvworkbook.theme", r.dataset.theme); }catch(e){}
+});
+try{ const t = localStorage.getItem("pvworkbook.theme"); if(t) document.documentElement.dataset.theme = t; }catch(e){}
+
+route();
+</script>
+</body>
+</html>
